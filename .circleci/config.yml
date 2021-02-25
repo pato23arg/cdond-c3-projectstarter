@@ -3,7 +3,7 @@ version: 2.1
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
+    # parameters:
       # Add parameter here   
     steps:
       - run:
@@ -12,10 +12,9 @@ commands:
           command: |
             # Your code here
             exit 1
-
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
-    parameters:
+    # parameters:
       # Add parameter here     
     steps:
       - run:
@@ -31,6 +30,13 @@ commands:
             #  Add revert code here. You can find this in the Getting Started section.
               exit 1
             fi
+parameters:
+  circleci_image:
+    type: string
+    default: circleci/node:latest
+  py_alp_image:
+    type: string
+    default: python:3.7-alpine3.11
             
 jobs:
   build-frontend:
@@ -41,12 +47,15 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
-          name: Build front-end
+          name: Install dependencies
           command: |
-            # Your code here
+            cd frontend
+            npm install
+      - run:
+          name: Compile the code
+          command: |
             cd frontend
             npm run build
-            exit 1
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -59,51 +68,83 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: Back-end build
+          name: Install dependencies
           command: |
-             # Your code here
-             cd backend
-             npm run build
-             exit 1
+            cd backend
+            npm install
+      - run:
+          name: Compile the code
+          command: |
+            cd backend
+            npm run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
 
   test-frontend:
     docker:
-      # Docker image here
+      - image: << pipeline.parameters.circleci_image >>
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Install deps
+          command: |
+            cd frontend
+            npm install
+      - run:
+          name: Test code
+          command: |
+            cd frontend
+            npm run test
                 
   test-backend:
     docker:
-      # Docker image here
+      - image: << pipeline.parameters.circleci_image >>
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: Install deps
+          command: |
+            cd backend
+            npm install
+      - run:
+          name: Test code
+          command: |
+            cd backend
+            npm run test
+        
             
   scan-frontend:
     docker:
-      # Docker image here
+      - image: << pipeline.parameters.circleci_image >>
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: placeholder
+          command: |
+            exit 1
 
   scan-backend:
     docker:
-      # Docker image here
+      - image: << pipeline.parameters.circleci_image >>
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: placeholder
+          command: |
+            exit 1
 
   deploy-infrastructure:
     docker:
-      # Docker image here that supports AWS CLI
+      - image: amazon/aws-cli
     steps:
       # Checkout code from git
       - run:
@@ -137,7 +178,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      # Docker image here that supports Ansible
+      - image: << pipeline.parameters.py_alp_image >>
     steps:
       # Checkout code from git
       # Add ssh keys with fingerprint
@@ -156,7 +197,7 @@ jobs:
 
   run-migrations:
     docker:
-      # Docker image here that supports NodeJS
+      - image: << pipeline.parameters.circleci_image >>
     steps:
       # Checkout code from git
       - run:
@@ -173,7 +214,7 @@ jobs:
 
   deploy-frontend:
     docker:
-      # Docker image here that supports AWS CLI
+      - image: amazon/aws-cli
     steps:
       # Checkout code from git
       - run:
@@ -194,7 +235,7 @@ jobs:
                     
   deploy-backend:
     docker:
-      # Docker image here that supports Ansible
+      - image: amazon/aws-cli
     steps:
       # Checkout code from git
       # Add ssh keys with fingerprint
@@ -211,7 +252,7 @@ jobs:
 
   smoke-test:
     docker:
-      # Lightweight Docker image 
+      - image: << pipeline.parameters.py_alp_image >> 
     steps:
       # Checkout code from git
       - run:
@@ -234,7 +275,7 @@ jobs:
 
   cloudfront-update:
     docker:
-      # Docker image here that supports AWS CLI
+      - image: amazon/aws-cli
     steps:
       # Checkout code from git
       - run:
@@ -247,9 +288,9 @@ jobs:
             # your code here
       # Here's where you will add some code to rollback on failure  
 
-cleanup:
+  cleanup:
     docker:
-      # Docker image here
+      - image: amazon/aws-cli
     steps:
       # Checkout code from git
       - run:
@@ -266,7 +307,6 @@ cleanup:
               # your code here
             fi
             
-
 workflows:
   default:
     jobs:
