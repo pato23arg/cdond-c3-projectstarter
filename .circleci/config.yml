@@ -51,6 +51,7 @@ jobs:
           command: |
             cd frontend
             npm install
+            npm install oauth-sign
       - run:
           name: Compile the code
           command: |
@@ -116,7 +117,7 @@ jobs:
           name: Test code
           command: |
             cd backend
-            npm run test:cov
+            npm run test
         
             
   scan-frontend:
