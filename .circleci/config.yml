@@ -128,9 +128,16 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
-          name: placeholder
+          name: Install Frontend deps
           command: |
-            exit 1
+            cd frontend
+            npm install
+            npm install oauth-sign
+      - run:
+          name: Scan Frontend
+          command: |
+            cd frontend
+            npm audit fix --audit-level=critical --force
 
   scan-backend:
     docker:
@@ -140,9 +147,15 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: placeholder
+          name: Install Backend deps
           command: |
-            exit 1
+            cd backend
+            npm install
+      - run:
+          name: Scan Backend
+          command: |
+            cd backend
+            npm audit fix --audit-level=critical --force
 
   deploy-infrastructure:
     docker:
