@@ -89,7 +89,7 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
-          name: Install deps
+          name: Install Frontend deps
           command: |
             cd frontend
             npm install
@@ -107,7 +107,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: Install deps
+          name: Install Backend deps
           command: |
             cd backend
             npm install
@@ -115,7 +115,7 @@ jobs:
           name: Test code
           command: |
             cd backend
-            npm run test
+            npm run test:cov
         
             
   scan-frontend:
