@@ -93,6 +93,7 @@ jobs:
           command: |
             cd frontend
             npm install
+            npm install oauth-sign
       - run:
           name: Test code
           command: |
