@@ -60,6 +60,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+      - slack/status
 
   build-backend:
     docker:
@@ -81,6 +82,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - slack/status
 
   test-frontend:
     docker:
@@ -100,7 +102,8 @@ jobs:
           command: |
             cd frontend
             npm run test
-                
+      - slack/status
+
   test-backend:
     docker:
       - image: << pipeline.parameters.circleci_image >>
@@ -118,7 +121,7 @@ jobs:
           command: |
             cd backend
             npm run test
-        
+      - slack/status
             
   scan-frontend:
     docker:
@@ -138,6 +141,7 @@ jobs:
           command: |
             cd frontend
             npm audit fix --audit-level=critical --force
+      - slack/status
 
   scan-backend:
     docker:
@@ -156,6 +160,7 @@ jobs:
           command: |
             cd backend
             npm audit fix --audit-level=critical --force
+      - slack/status
 
   deploy-infrastructure:
     docker:
