@@ -37,7 +37,10 @@ parameters:
   py_alp_image:
     type: string
     default: python:3.7-alpine3.11
-            
+
+orbs:
+  slack: circleci/slack@3.4.2  # for slack integration to https://udapeople.slack.com; reference: https://circleci.com/blog/continuous-integration-slack-twilio/
+
 jobs:
   build-frontend:
     docker:
