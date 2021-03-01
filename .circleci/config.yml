@@ -178,6 +178,10 @@ jobs:
       # Checkout code from git
       - checkout
       - run:
+          name: Install Dependencies for Persistence
+          command: |
+            yum install -y tar gzip
+      - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
