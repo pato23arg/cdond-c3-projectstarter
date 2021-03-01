@@ -179,7 +179,7 @@ jobs:
       - checkout
       - run:
           name: Install Dependencies for Persistence
-          command: yum install -y tar gzip
+          command: yum install -y tar
       - run:
           name: Ensure back-end infrastructure exists
           command: |
