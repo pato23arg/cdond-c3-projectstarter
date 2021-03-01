@@ -180,8 +180,8 @@ jobs:
       - run:
           name: Install Dependencies for Persistence
           command: |
-             yum install -y tar
-             yum install -y gzip
+            yum install -y tar
+            # yum install -y gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -207,10 +207,10 @@ jobs:
                  --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
                  --output text >> inventory
             cat inventory
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
+            #- persist_to_workspace:
+            #root: .
+            #paths:
+            #- cdond-c3-projectstarter/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
           wkfl_id: ${CIRCLE_WORKFLOW_ID}
