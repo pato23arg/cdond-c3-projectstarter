@@ -274,7 +274,8 @@ jobs:
             else
               echo "Migration failed, verify configuration!
               curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "MIGRATION_FAILED" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID}
-            fi                                                                                                echo "wkfl_id=${CIRCLE_WORKFLOW_ID}"
+            fi
+            echo "wkfl_id=${CIRCLE_WORKFLOW_ID}"
      # Here's where you will add some code to rollback on failure
       - destroy-environment:
           wkfl_id: ${CIRCLE_WORKFLOW_ID}
@@ -294,7 +295,7 @@ jobs:
           name: Get backend url
           command: |
             # your code here
-           export API_URL=$(curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/BACKEND_URL)
+            export API_URL=$(curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/BACKEND_URL)
             echo "${API_URL}"
       - run:
           name: Deploy frontend objects
