@@ -244,8 +244,7 @@ jobs:
           name: Configure server
           working_directory: ./.circleci/ansible
           command: |
-            ansible-playbook -i inventory configure-server.yaml
-            exit 1
+            ansible-playbook -i inventory configure-server.yml
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
           wkfl_id: ${CIRCLE_WORKFLOW_ID}
@@ -256,23 +255,37 @@ jobs:
       - image: << pipeline.parameters.circleci_image >>
     steps:
       # Checkout code from git
+      - checkout
       - run:
           name: Run migrations
+          working_directory: ./backend
           command: |
             # Your code here
-            exit 1
+            npm run migrations > backend_migration_status
       - run:
           name: Send migration results to memstash
+          working_directory: ./backend
           command: |
             # Your code here
-            exit 1
-     # Here's where you will add some code to rollback on failure      
+            if grep -q "has been executed successfully" backend_migration_status
+            then
+              echo "Migration OK, updating memstash..."
+              curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "MIGRATION_OK" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID}
+            else
+              echo "Migration failed, verify configuration!
+              curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "MIGRATION_FAILED" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID}
+            fi                                                                                                echo "wkfl_id=${CIRCLE_WORKFLOW_ID}"
+     # Here's where you will add some code to rollback on failure
+      - destroy-environment:
+          wkfl_id: ${CIRCLE_WORKFLOW_ID}
+          when: on_fail
 
   deploy-frontend:
     docker:
       - image: amazon/aws-cli
     steps:
       # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -281,14 +294,23 @@ jobs:
           name: Get backend url
           command: |
             # your code here
-            export API_URL="http://${BACKEND_IP}:3030"
+           export API_URL=$(curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/BACKEND_URL)
             echo "${API_URL}"
       - run:
           name: Deploy frontend objects
+          working_directory: ./frontend
           command: |
             # your code here
+            aws s3 cp ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}" --recursive
+      - persiste_to_workspace:
+          root: .
+          paths:
+            - frontend/dist
       # Here's where you will add some code to rollback on failure      
-                    
+      - destroy-environment:
+          wkfl_id: ${CIRCLE_WORKFLOW_ID}
+          when: on_fail
+
   deploy-backend:
     docker:
       - image: amazon/aws-cli
