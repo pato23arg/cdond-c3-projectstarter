@@ -207,7 +207,7 @@ jobs:
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"
       - run:
           name: Add back-end ip to ansible inventory
-          working_directory: ./cdond-c3-projectstarter/.circleci/ansible
+          working_directory: ./.circleci/ansible
           command: |
             aws ec2 describe-instances \
                  --query 'Reservations[*].Instances[*].PublicIpAddress' \
@@ -217,7 +217,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - ./cdond-c3-projectstarter/.circleci/ansible/inventory.txt
+            - .circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
           wkfl_id: ${CIRCLE_WORKFLOW_ID}
@@ -236,13 +236,13 @@ jobs:
           at: .
       - run:
           name: Install dependencies
-          working_directory: ./cdond-c3-projectstarter/.circleci/ansible
+          working_directory: ./.circleci/ansible
           command: |
             # Your code here
             apk add -- update ansible
       - run:
           name: Configure server
-          working_directory: ./cdond-c3-projectstarter/.circleci/ansible
+          working_directory: ./.circleci/ansible
           command: |
             ansible-playbook -i inventory configure-server.yaml
             exit 1
