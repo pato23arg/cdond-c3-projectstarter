@@ -213,7 +213,7 @@ jobs:
                  --query 'Reservations[*].Instances[*].PublicIpAddress' \
                  --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
                  --output text >> inventory.txt
-            cat inventory
+            cat inventory.txt
       - persist_to_workspace:
           root: .
           paths:
@@ -244,7 +244,7 @@ jobs:
           name: Configure server
           working_directory: ./.circleci/ansible
           command: |
-            ansible-playbook -i inventory configure-server.yml
+            ansible-playbook -i inventory.txt configure-server.yml
       # Here's where you will add some code to rollback on failure      
       - destroy-environment:
           wkfl_id: ${CIRCLE_WORKFLOW_ID}
