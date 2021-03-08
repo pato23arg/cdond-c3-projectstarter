@@ -20,21 +20,28 @@ commands:
             aws s3 rm s3://udapeople-<< parameters.wkfl_id >> --recursive
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
-    # parameters:
-      # Add parameter here     
+    parameters:
+      # Add parameter here
+      wkfl_id:
+        type: string
+      when:
+        type: string   
     steps:
       - run:
           name: Revert migrations
           # Add when this will run
+          when: << parameters.when >>
+          working_directory: ./backend
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
+            SUCCESS=$(curl -H "token: 2a9e15d6-b9fa-4b1f-a5dc-e3b9643a9b63" --request GET https://api.memstash.io/values/migration_<< parameters.wkfl_id >>)
+            echo $SUCCESS
+            if(( $SUCCESS=="success" )); 
             then
             #  cd ~/project/backend
-            #  npm install
+               npm install
             #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
+               npm run migrations:revert
             fi
 parameters:
   circleci_image:
@@ -273,10 +280,10 @@ jobs:
             if grep -q "has been executed successfully" backend_migration_status
             then
               echo "Migration OK, updating memstash..."
-              curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "MIGRATION_OK" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID}
+              curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "MIGRATION_OK" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
             else
-              echo "Migration failed, verify configuration!
-              curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "MIGRATION_FAILED" https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID}
+              echo "Migration failed, verify configuration!"
+              curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "MIGRATION_FAILED" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
             fi
             echo "wkfl_id=${CIRCLE_WORKFLOW_ID}"
      # Here's where you will add some code to rollback on failure
@@ -311,6 +318,7 @@ jobs:
           working_directory: ./frontend
           command: |
             # your code here
+            npm run build
             aws s3 cp ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}" --recursive
       - persist_to_workspace:
           root: .
@@ -323,20 +331,36 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: amazon/aws-cli
+      - image: << pipeline.parameters.py_alp_image >>
     steps:
       # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
+      - add_ssh_keys: 
+          fingerprints: ["d6:c5:72:d7:85:64:aa:e9:a1:92:21:06:1e:d9:1a:13:0b:3d:7a:45"]
       # attach workspace
+      - attach_workspace:
+          at: .
       - run:
           name: Install dependencies
           command: |
             # your code here
+            cd /tmp
+            apk add --update ansible curl rsync openssh nodejs npm
+            pip install awscli 
       - run:
           name: Deploy backend
+          working_directory: ./.circleci/ansible
           command: |
             # your code here
-      # Here's where you will add some code to rollback on failure  
+            ansible-playbook -i inventory deploy-server.yaml -vv
+      # Here's where you will add some code to rollback on failure
+      - destroy-environment:
+          wkfl_id: ${CIRCLE_WORKFLOW_ID}
+          when: on_fail
+      - revert-migrations:
+          wkfl_id: ${CIRCLE_WORKFLOW_ID}
+          when: on_fail
 
   smoke-test:
     docker:
