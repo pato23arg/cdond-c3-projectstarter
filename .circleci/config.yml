@@ -321,6 +321,9 @@ jobs:
           working_directory: ./frontend
           command: |
             # your code here
+            npm install 
+            npm install oauth2
+            npm install webpack
             npm run build
             aws s3 cp ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}" --recursive
       - persist_to_workspace:
