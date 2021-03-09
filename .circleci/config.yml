@@ -390,18 +390,25 @@ jobs:
           command: |
             # your code here
             export BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/BACKEND_URL)
+            echo ${BACKEND_URL}
       - run:
           name: Backend smoke test.
           working_directory: ./backend
           command: |
             # your code here
-            curl "$BACKEND_URL/api/status"
+            echo ${BACKEND_URL}
+            curl -s "${BACKEND_URL}/api/status"
       - run:
           name: Frontend smoke test.
           working_directory: ./frontend
           command: |
             S3_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-1.amazonaws.com/index.html"
-            curl -s ${S3_URL} | grep -q "Welcome"
+            if curl -s ${S3_URL} | grep -q "Welcome"
+            then
+              return 1
+            else
+              return 1
+            fi
       # Here's where you will add some code to rollback on failure
       - destroy-environment:
           wkfl_id: ${CIRCLE_WORKFLOW_ID}
