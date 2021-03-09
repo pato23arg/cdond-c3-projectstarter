@@ -389,13 +389,14 @@ jobs:
           working_directory: ./backend
           command: |
             # your code here
-            export BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/BACKEND_URL)
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/BACKEND_URL)
             echo ${BACKEND_URL}
       - run:
           name: Backend smoke test.
           working_directory: ./backend
           command: |
             # your code here
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/BACKEND_URL)
             echo ${BACKEND_URL}
             curl -s "${BACKEND_URL}/api/status"
       - run:
@@ -407,7 +408,7 @@ jobs:
             then
               return 1
             else
-              return 1
+              return 0
             fi
       # Here's where you will add some code to rollback on failure
       - destroy-environment:
@@ -427,10 +428,17 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
+            exit 1
       - run:
           name: Update cloudfront distribution
+          working_directory: ./.circleci/files
           command: |
-            # your code here
+          # your code here
+            aws cloudformation deploy \
+              --template-file cloudfront.yml \
+              --stack-name udapeople-cloudfront-${CIRCLE_WORKFLOW_ID} \
+              --parameter-overrides WorkflowId=${CIRCLE_WORKFLOW_ID}
+              --tags project=udapeople-cloudfront-${CIRCLE_WORKFLOW_ID}
       # Here's where you will add some code to rollback on failure
       - destroy-environment:
           wkfl_id: ${CIRCLE_WORKFLOW_ID}
