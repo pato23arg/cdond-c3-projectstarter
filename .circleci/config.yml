@@ -271,6 +271,7 @@ jobs:
           working_directory: ./backend
           command: |
             # Your code here
+            npm install
             npm run migrations > backend_migration_status
             more backend_migration_status
       - run:
