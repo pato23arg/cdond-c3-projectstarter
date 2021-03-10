@@ -90,11 +90,17 @@ jobs:
           command: |
             cd backend
             npm install
+      - persist_to_workspace:
+          root: .
+          paths: backend/node_modules
       - run:
           name: Compile the code
           command: |
             cd backend
             npm run build
+      - persist_to_workspace:
+          root: .
+          paths: backend/build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
