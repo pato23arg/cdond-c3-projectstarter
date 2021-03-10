@@ -271,10 +271,8 @@ jobs:
           working_directory: ./backend
           command: |
             # Your code here
-            npm install
-            npm fund
-            npm audit fix --force
             npm run migrations > backend_migration_status
+            more backend_migration_status
       - run:
           name: Send migration results to memstash
           working_directory: ./backend
