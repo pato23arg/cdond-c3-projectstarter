@@ -36,7 +36,7 @@ commands:
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
             SUCCESS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_<< parameters.wkfl_id >>)
             echo $SUCCESS
-            if(( $SUCCESS=="success" )); 
+            if(( $SUCCESS=="MIGRATION_OK" )); 
             then
             #  cd ~/project/backend
                npm install
@@ -272,6 +272,8 @@ jobs:
           command: |
             # Your code here
             npm install
+            npm fund
+            npm audit fix --force
             npm run migrations > backend_migration_status
       - run:
           name: Send migration results to memstash
