@@ -278,7 +278,7 @@ jobs:
           command: |
             # Your code here
             npm install
-            npm run migrations
+            npm run migrations > backend_migration_status
             #cat backend_migration_status
       - run:
           name: Send migration results to memstash
