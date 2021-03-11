@@ -46,7 +46,7 @@ commands:
 parameters:
   circleci_image:
     type: string
-    default: circleci/node:latest
+    default: circleci/node:13.8.0
   py_alp_image:
     type: string
     default: python:3.7-alpine3.11
