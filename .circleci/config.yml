@@ -418,12 +418,12 @@ jobs:
               return 0
             fi
       # Here's where you will add some code to rollback on failure
-      #- destroy-environment:
-      #wkfl_id: ${CIRCLE_WORKFLOW_ID}
-      #when: on_fail
-          #    - revert-migrations:
-          #wkfl_id: ${CIRCLE_WORKFLOW_ID}
-          #when: on_fail 
+      - destroy-environment:
+          wkfl_id: ${CIRCLE_WORKFLOW_ID}
+          when: on_fail
+      - revert-migrations:
+          wkfl_id: ${CIRCLE_WORKFLOW_ID}
+          when: on_fail 
 
   cloudfront-update:
     docker:
@@ -463,7 +463,7 @@ jobs:
           name: Get old stack workflow id
           command: |
             # your code here
-            export OldWorkflowID="the id here"
+            export OldWorkflowID=$OLD_WORKFLOW_ID
             export STACKS=[] #put the list of stacks here
       - run:
           name: Remove old stacks and files
