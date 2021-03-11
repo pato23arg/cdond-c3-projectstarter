@@ -24,8 +24,7 @@
       # Your code here
 #       raw: apt -y update && apt install -y python3
 #       when: check_python.rc != 0
-      - name: "try fix proposed in github"
-        shell: pm2 start ./backend/dist/main.js --update-env
+
   roles:
     # Your code here
     - configure-server

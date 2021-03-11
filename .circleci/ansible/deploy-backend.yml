@@ -14,7 +14,7 @@
       wait_for_connection:
           timeout: 100
     - name: "run pm2"
-      raw: pm2 start npm -- run start
+      shell: pm2 start ./backend/dist/main.js --update-env
       
   roles:
     - deploy
